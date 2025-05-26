@@ -1,5 +1,6 @@
 import base64
 import requests
+import logging
 from io import BytesIO, StringIO
 from flask import Blueprint, render_template, session, request, redirect, url_for, jsonify, Response, flash
 from mutagen.mp3 import MP3
@@ -106,7 +107,9 @@ def metadata(file_id):
                 meta["album_art"] = f"data:{apic[0].mime};base64,{base64.b64encode(apic[0].data).decode()}"
         return jsonify(meta)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logging.exception(e)
+        return jsonify({"error": "An internal error occurred."}), 500
+
 
 
 @main_bp.route("/metadata/batch", methods=["POST"])
@@ -138,7 +141,9 @@ def batch_metadata():
 
         return jsonify(results)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logging.exception(e)
+        return jsonify({"error": "An internal error occurred."}), 500
+
 
 
 @main_bp.route("/users", methods=["GET", "POST"])
