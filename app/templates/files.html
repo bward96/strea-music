@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Browse Files - StreaMusic{% endblock %}
+{% block bodyclass %}files-bg{% endblock %}
+
+{% block content %}
+  <!-- NAVBAR WITH LOGO, CENTERED TITLE, QUEUE, HAMBURGER -->
+  <header>
+    <nav class="navbar">
+      <div class="navbar-left">
+        <a href="{{ url_for('main.home') }}">
+          <img src="/static/logo.png" alt="StreaMusic Logo" class="navbar-logo">
+        </a>
+      </div>
+      <div class="navbar-center">
+        <span class="navbar-title">STREAMusic</span>
+        {# or use an image if preferred #}
+        {# <img src="/static/logo-header.png" alt="STREAMusic" class="navbar-title-img"> #}
+      </div>
+      <div class="navbar-right nav-actions">
+        <button id="toggleQueue" class="btn">Queue</button>
+        <div class="hamburger-menu-wrapper">
+          <div class="hamburger-menu" id="hamburger-menu" onclick="toggleHamburgerMenu()">
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+          <div id="hamburger-menu-dropdown" class="hamburger-menu-dropdown">
+            {% if is_admin %}
+              <a href="{{ url_for('main.list_users') }}" class="btn">Admin</a>
+            {% endif %}
+            {% if session.get('access_token') %}
+              <form method="POST" action="{{ url_for('auth.logout') }}">
+                {{ logout_form.hidden_tag() }}
+                <button type="submit" class="btn">Logout</button>
+              </form>
+            {% else %}
+              <a href="{{ url_for('auth.login') }}" class="btn">Login</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- MAIN FILES SECTION -->
+  <main>
+    <section class="files-section">
+      <div class="search-container">
+        <input type="search" id="searchInput" placeholder="Search files...">
+        <span class="clear-icon" onclick="clearSearch()">&times;</span>
+      </div>
+      <ul class="file-list" id="fileListContainer">
+        {% if folder_id != "root" %}
+          <li class="back-btn" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back</span>
+          </li>
+        {% endif %}
+        {% for file in files %}
+          {% if file.get("folder") or (file["name"]|lower)[-4:] == ".mp3" %}
+            {% if file.get("folder") %}
+              <li class="folder-item" onclick="navigateToFolder('{{ file['id'] }}')">
+                <i class="fas fa-folder folder-icon"></i>
+                <span class="name">{{ file['name'] }}</span>
+              </li>
+            {% else %}
+              <li class="file-item">
+                <img class="file-thumbnail" data-fileid="{{ file['id'] }}" src="/static/default-thumbnail.png" alt=""/>
+                <span class="name" onclick="selectFile('{{ file['id'] }}', '{{ file['name']|replace('.mp3','')|replace('.MP3','')|replace("'", '&#39;') }}')">
+                  {{ file['name']|replace('.mp3','')|replace('.MP3','') }}
+                </span>
+                <div class="actions">
+                  <button class="queue-btn btn" onclick="addToQueue('{{ file['id'] }}', '{{ file['name']|replace('.mp3','')|replace('.MP3','')|replace("'", '&#39;') }}')">+ Queue</button>
+                </div>
+              </li>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </section>
+  </main>
+
+  <!-- QUEUE SIDEBAR -->
+  <aside id="queue-container" class="queue-container">
+    <h3>Queue</h3>
+    <button id="clearQueue" class="btn" onclick="clearQueue()">Clear All</button>
+    <ul id="queue-list"></ul>
+  </aside>
+
+  <!-- MEDIA PLAYER BAR -->
+  <div id="media-player-container">
+    <div class="metadata-panel">
+      <img id="album-artwork" src="" alt="Album Artwork">
+      <div class="metadata-text">
+        <p id="metadata-album">Album: Unknown</p>
+        <p id="metadata-duration">Duration: Unknown</p>
+      </div>
+      <button id="lyrics-button" class="btn" onclick="openLyrics()">Lyrics</button>
+    </div>
+    <p id="now-playing"></p>
+    <audio id="audio-player" preload="none" style="display:none;">
+      <source id="audio-source" src="" type="audio/mp3">
+    </audio>
+    <div class="player-controls">
+      <button class="btn" onclick="previousSong()"><i class="fas fa-step-backward"></i></button>
+      <button class="btn" id="playPauseBtn" onclick="togglePlayPause()"><i class="fas fa-play"></i></button>
+      <button class="btn" onclick="nextSong()"><i class="fas fa-step-forward"></i></button>
+      <span id="current-time">0:00</span>
+      <input type="range" id="progress-bar" value="0" min="0" max="100" step="1" />
+      <span id="duration">0:00</span>
+      <i id="volume-icon" class="fas fa-volume-up"></i>
+      <input type="range" id="volume-slider" min="0" max="100" step="1" value="50">
+      <button class="btn" id="shuffleBtn" onclick="toggleShuffle()"><i class="fas fa-random"></i></button>
+      <button class="btn" id="repeatBtn" onclick="toggleRepeat()"><i class="fas fa-redo"></i></button>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/js/all.min.js"></script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+{% endblock %}

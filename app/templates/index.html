@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}StreaMusic - OneDrive MP3 Streamer{% endblock %}
+
+{% block content %}
+  <div class="home-landing">
+    <img class="home-logo" src="/static/logo.png" alt="StreaMusic Logo">
+    <h2 class="home-title">Welcome to StreaMusic</h2>
+    <p class="home-desc">
+      StreamMusic is a OneDrive MP3 Streamer that lets you browse your OneDrive for MP3 files and stream your favorite tunes seamlessly from the cloud.
+    </p>
+    <div class="button-group">
+      {% if session.access_token %}
+        <form method="POST" action="{{ url_for('auth.logout') }}">
+          {{ logout_form.hidden_tag() }}
+          <button type="submit" class="button">Logout</button>
+        </form>
+      {% else %}
+        <a class="button" href="{{ url_for('auth.login') }}">Login</a>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

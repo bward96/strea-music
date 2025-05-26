@@ -1,0 +1,27 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Environment variables
+.env
+ID&Secret.txt
+
+# Editor & OS settings
+.vscode/
+*.log
+*.DS_Store
+Thumbs.db
+
+# Database
+*.sqlite3
+*.db
+instance/
+
+# Node dependencies (if using npm/yarn)
+node_modules/
+
+# Compiled static assets
+/static/build/
+/dist/
+/*.zip

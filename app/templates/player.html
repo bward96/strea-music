@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OneDrive Music Player</title>
+</head>
+<body>
+    <h1>My OneDrive Music</h1>
+    <button onclick="fetchMusic()">Load Music</button>
+    <ul id="music-list"></ul>
+    <audio id="audio-player" controls></audio>
+<a href="{{ url_for('get_files') }}" style="padding: 10px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+    🎵 Browse Music
+</a>
+    <script>
+        function fetchMusic() {
+            fetch("/files")
+                .then(response => response.json())
+                .then(data => {
+                    const list = document.getElementById("music-list");
+                    list.innerHTML = "";
+
+                    data.music_files.forEach(file => {
+                        const listItem = document.createElement("li");
+                        const playButton = document.createElement("button");
+
+                        playButton.textContent = file.name;
+                        playButton.onclick = () => {
+                            document.getElementById("audio-player").src = file.url;
+                            document.getElementById("audio-player").play();
+                        };
+
+                        listItem.appendChild(playButton);
+                        list.appendChild(listItem);
+                    });
+                });
+        }
+    </script>
+</body>
+</html>
