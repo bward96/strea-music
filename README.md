@@ -33,7 +33,9 @@ Create a .env file in the root directory of the project with the following conte
 **JWT_SECRET=your_jwt_secret**
 
 ⚠️ Never commit your .env file to GitHub. It contains secrets that should remain private.
+
 🧑‍💻 Setting Up the User Database
+
 Step 1: Initialize the SQLite Database
 
 python
