@@ -74,7 +74,12 @@ Then open http://localhost:5000 in your browser.
 
 💡 **Notes**
 
-    You must use your own Microsoft Azure app credentials (Client ID and Secret)
+    You must use your own Microsoft Azure app credentials (Client ID and Secret) The app will need the following permissions to work:
+    Files.Read — read access to the user’s OneDrive files.
+    Files.Read.All (optional) — read access to all user's OneDrive files (if you want admin-level visibility across multiple users or shared drives).
+    offline_access — allows refresh token usage so users don’t have to log in every time.
+    User.Read — allows access to basic user profile (used for login/session management).
+    
     This project is intended for personal or developer use only unless you’ve added proper security and deployment measures
 
 📜 **License**
