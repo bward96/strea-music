@@ -26,7 +26,7 @@ Create a .env file in the root directory of the project with the following conte
 
 **REDIRECT_URI=http://localhost:5000/callback**
 
-**SECRET_KEY=your_flask_secret_key**
+**FLASK_SECRET_KEY=your_flask_secret_key**
 
 **DATABASE_URL=sqlite:///instance/app.db**
 
