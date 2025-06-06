@@ -4,38 +4,40 @@ StreaMusic is a web app built with Python (Flask) that lets users connect to One
 
 🔧 **Setup Instructions**
 1. Clone the Repository
-
-git clone https://github.com/YOUR_USERNAME/strea-music.git
-cd strea-music
+    
+        git clone https://github.com/YOUR_USERNAME/strea-music.git
+        cd strea-music
 
 2. Create a Virtual Environment (Optional but Recommended)
-
-python -m venv venv
-source venv/bin/activate    # On Windows: venv\Scripts\activate
+    
+        python -m venv venv
+        source venv/bin/activate    # On Windows: venv\Scripts\activate
 
 3. Install Dependencies
 
-pip install -r requirements.txt
+        pip install -r requirements.txt
 
-🔑 Environment Variables
+
+🔑 **Environment Variables**
 
 Create a .env file in the root directory of the project with the following content:
-
-**CLIENT_ID=your_onedrive_app_client_id**
-
-**CLIENT_SECRET=your_onedrive_app_client_secret**
-
-**REDIRECT_URI=http://localhost:5000/callback**
-
-**FLASK_SECRET_KEY=your_flask_secret_key**
-
-**DATABASE_URL=sqlite:///instance/app.db**
-
-**JWT_SECRET=your_jwt_secret**
+    
+    CLIENT_ID=your_onedrive_app_client_id
+    
+    CLIENT_SECRET=your_onedrive_app_client_secret
+    
+    REDIRECT_URI=http://localhost:5000/callback
+    
+    FLASK_SECRET_KEY=your_flask_secret_key
+    
+    DATABASE_URL=sqlite:///instance/app.db
+    
+    JWT_SECRET=your_jwt_secret
 
 ⚠️ Never commit your .env file to GitHub. It contains secrets that should remain private.
 
-🧑‍💻 Setting Up the User Database
+
+🧑‍💻 **Setting Up the User Database**
 
 Step 1: Initialize the SQLite Database
 
@@ -43,24 +45,26 @@ python
 
 Then in the Python shell:
 
-from app import db
-from app.models import User  # Adjust import if needed
-db.create_all()
+    from app import db
+    from app.models import User  # Adjust import if needed
+    db.create_all()
 
 Step 2: Make Yourself an Admin
 
 After logging in through OneDrive once, run the following:
 
-user = User.query.filter_by(email="your@email.com").first()
-user.is_admin = True
-db.session.commit()
+    user = User.query.filter_by(email="your@email.com").first()
+    user.is_admin = True
+    db.session.commit()
 
 🚀 Running the App
-
-python run.py
+    
+    python run.py
 
 Then open http://localhost:5000 in your browser.
-🛡️ Features
+
+
+🛡️ **Features**
 
     ✅ OneDrive login integration
     📂 Folder navigation and MP3 streaming
@@ -68,12 +72,12 @@ Then open http://localhost:5000 in your browser.
     ♻️ Media player with shuffle/repeat
     🧑‍💼 Admin dashboard (only visible to admins)
 
-💡 Notes
+💡 **Notes**
 
     You must use your own Microsoft Azure app credentials (Client ID and Secret)
     This project is intended for personal or developer use only unless you’ve added proper security and deployment measures
 
-📜 License
+📜 **License**
 
 This project is licensed under a custom non-commercial license based on the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
 
