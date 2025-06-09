@@ -33,9 +33,6 @@ document.addEventListener("DOMContentLoaded", function() {
     queueContainer.addEventListener("click", function(e) {
       e.stopPropagation();
     });
-    queueContainer.addEventListener("click", function(e) {
-      e.stopPropagation();
-    });
   }
 });
 document.addEventListener("click", function(e) {
