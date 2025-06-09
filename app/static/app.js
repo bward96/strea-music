@@ -19,9 +19,16 @@ document.addEventListener('click', function(e) {
 document.addEventListener("DOMContentLoaded", function() {
   const toggleQueueBtn = document.getElementById("toggleQueue");
   const queueContainer = document.getElementById("queue-container");
+  const mainElem = document.querySelector("main");
   if (toggleQueueBtn && queueContainer) {
     toggleQueueBtn.addEventListener("click", function() {
       queueContainer.classList.toggle("active");
+      if (mainElem) {
+        mainElem.classList.toggle(
+          "queue-active",
+          queueContainer.classList.contains("active")
+        );
+      }
     });
     queueContainer.addEventListener("click", function(e) {
       e.stopPropagation();
@@ -31,6 +38,7 @@ document.addEventListener("DOMContentLoaded", function() {
 document.addEventListener("click", function(e) {
   const queue = document.getElementById("queue-container");
   const btn = document.getElementById("toggleQueue");
+  const mainElem = document.querySelector("main");
   if (!queue || !btn) return;
   if (
     !queue.contains(e.target) &&
@@ -38,6 +46,7 @@ document.addEventListener("click", function(e) {
     queue.classList.contains("active")
   ) {
     queue.classList.remove("active");
+    if (mainElem) mainElem.classList.remove("queue-active");
   }
 });
 
