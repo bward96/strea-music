@@ -363,8 +363,8 @@ main.queue-active { margin-right: 250px; }
   position: fixed;
   right: -300px;
   top: 80px;
+  bottom: 80px;
   width: 250px;
-  height: calc(100% - 80px);
   background: #1f1f1f;
   color: #fff;
   padding: 20px;
