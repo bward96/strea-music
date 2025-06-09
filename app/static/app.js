@@ -23,6 +23,9 @@ document.addEventListener("DOMContentLoaded", function() {
     toggleQueueBtn.addEventListener("click", function() {
       queueContainer.classList.toggle("active");
     });
+    queueContainer.addEventListener("click", function(e) {
+      e.stopPropagation();
+    });
   }
 });
 document.addEventListener("click", function(e) {
@@ -586,6 +589,25 @@ function updateGlobalFileList() {
     const fileName = item.querySelector(".name").innerText;
     return { fileId, fileName };
   });
+}
+
+function loadNextFromFileList() {
+  if (fileList.length === 0) return;
+  let nextIndex = 0;
+  if (songQueue[currentIndex]) {
+    const currId = songQueue[currentIndex].fileId;
+    const idx = fileList.findIndex(item => item.fileId === currId);
+    if (idx >= 0 && idx < fileList.length - 1) {
+      nextIndex = idx + 1;
+    } else {
+      return; // reached end of list with no repeat
+    }
+  }
+  const nextSong = fileList[nextIndex];
+  songQueue.push({ fileId: nextSong.fileId, fileName: nextSong.fileName });
+  currentIndex = songQueue.length - 1;
+  playCurrentSong();
+  savePlayerState();
 }
 
 // ========== Drag-and-Drop for Queue Reordering ==========
