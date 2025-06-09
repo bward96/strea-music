@@ -20,7 +20,7 @@ def client():
 
 def test_home_renders(client):
     response = client.get("/", follow_redirects=True)
-    assert b"StreamMusic" in response.data
+    assert b"StreaMusic" in response.data
 
 def test_get_files_redirects_when_logged_out(client):
     # explicitly verify session before testing
