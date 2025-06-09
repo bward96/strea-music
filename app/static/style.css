@@ -491,7 +491,20 @@ main.queue-active { margin-right: 250px; }
   -webkit-appearance: none;
   appearance: none;
 }
-#progress-bar::-webkit-slider-runnable-track,
+#progress-bar::-webkit-slider-runnable-track {
+  background: transparent;
+  height: 6px;
+}
+#progress-bar::-moz-range-track {
+  background: transparent;
+  height: 6px;
+}
+#progress-bar::-ms-fill-lower {
+  background: #1db954;
+}
+#progress-bar::-ms-fill-upper {
+  background: #444;
+}
 /* ========== VOLUME SLIDER ========== */
 #volume-slider {
   width: 80px;
@@ -555,7 +568,6 @@ main.queue-active { margin-right: 250px; }
 }
 
 /* JS to update --volplayed */
-}
 #current-time, #duration {
   color: #ccc;
   font-size: 0.8rem;
