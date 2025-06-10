@@ -490,6 +490,7 @@ main.queue-active { margin-right: 250px; }
   border: none;
   -webkit-appearance: none;
   appearance: none;
+  margin-top: -3px;
 }
 #progress-bar::-webkit-slider-runnable-track {
   background: transparent;
@@ -549,6 +550,7 @@ main.queue-active { margin-right: 250px; }
   background: #1db954;
   cursor: pointer;
   border: none;
+  margin-top: -3px;
 }
 #volume-slider::-moz-range-track {
   background: transparent;
