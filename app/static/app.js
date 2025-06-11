@@ -291,11 +291,13 @@ function showMetadata(fileId, signal) {
         window.location.href = "/";
         return;
       }
-      document.getElementById("metadata-album").innerText = `Album: ${data.album || "Unknown"}`;
-      const durationText = data.duration ? formatDuration(data.duration) : "Unknown";
-      document.getElementById("metadata-duration").innerText = `Duration: ${durationText}`;
       const albumArtwork = document.getElementById("album-artwork");
-      albumArtwork.src = (data.album_art && data.album_art.trim() !== "") ? data.album_art : "";
+      if (data.album_art && data.album_art.trim() !== "") {
+        albumArtwork.src = data.album_art;
+      } else {
+        albumArtwork.src = "";
+      }
+      // album and duration information is no longer displayed in the UI
     })
     .catch(err => {
       if (err.name === "AbortError") {
