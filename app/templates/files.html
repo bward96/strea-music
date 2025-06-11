@@ -6,6 +6,7 @@
   <!-- NAVBAR WITH LOGO, CENTERED TITLE, QUEUE, HAMBURGER -->
   <header>
     <nav class="navbar">
+      <input type="range" id="progress-bar" value="0" min="0" max="100" step="1" class="nav-progress" />
       <div class="navbar-left">
         <a href="{{ url_for('main.home') }}">
           <img src="/static/logo.png" alt="StreaMusic Logo" class="navbar-logo">
@@ -106,7 +107,6 @@
       <button class="btn" id="playPauseBtn" onclick="togglePlayPause()"><i class="fas fa-play"></i></button>
       <button class="btn" onclick="nextSong()"><i class="fas fa-step-forward"></i></button>
       <span id="current-time">0:00</span>
-      <input type="range" id="progress-bar" value="0" min="0" max="100" step="1" />
       <span id="duration">0:00</span>
       <i id="volume-icon" class="fas fa-volume-up"></i>
       <input type="range" id="volume-slider" min="0" max="100" step="1" value="50">
