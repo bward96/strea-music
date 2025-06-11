@@ -159,12 +159,17 @@ def batch_metadata():
                 try:
                     audio = MP3(BytesIO(res.content))
                     tags = audio.tags or {}
-                    album_art = ""
+                    meta = {
+                        "title": tags.get("TIT2", {}).text[0] if tags.get("TIT2") else "",
+                        "artist": tags.get("TPE1", {}).text[0] if tags.get("TPE1") else "",
+                        "album": tags.get("TALB", {}).text[0] if tags.get("TALB") else "",
+                        "album_art": ""
+                    }
                     if hasattr(tags, "getall"):
                         apic = tags.getall("APIC")
                         if apic:
-                            album_art = f"data:{apic[0].mime};base64,{base64.b64encode(apic[0].data).decode()}"
-                    results[file_id] = {"album_art": album_art}
+                            meta["album_art"] = f"data:{apic[0].mime};base64,{base64.b64encode(apic[0].data).decode()}"
+                    results[file_id] = meta
                 except:
                     results[file_id] = {}
             else:

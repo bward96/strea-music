@@ -66,9 +66,10 @@
             {% else %}
               <li class="file-item">
                 <img class="file-thumbnail" data-fileid="{{ file['id'] }}" src="/static/default-thumbnail.png" alt=""/>
-                <span class="name" onclick="selectFile('{{ file['id'] }}', '{{ file['name']|replace('.mp3','')|replace('.MP3','')|replace("'", '&#39;') }}')">
-                  {{ file['name']|replace('.mp3','')|replace('.MP3','') }}
-                </span>
+                <div class="file-info" onclick="selectFile('{{ file['id'] }}', '{{ file['name']|replace('.mp3','')|replace('.MP3','')|replace("'", '&#39;') }}')">
+                  <span class="file-title">{{ file['name']|replace('.mp3','')|replace('.MP3','') }}</span>
+                  <span class="artist-album"></span>
+                </div>
                 <div class="actions">
                   <button class="queue-btn btn" onclick="addToQueue('{{ file['id'] }}', '{{ file['name']|replace('.mp3','')|replace('.MP3','')|replace("'", '&#39;') }}')">+ Queue</button>
                 </div>
