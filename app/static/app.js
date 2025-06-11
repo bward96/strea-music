@@ -197,6 +197,14 @@ function clearQueue() {
   }
 }
 
+function trimQueue() {
+  if (currentIndex > 3) {
+    const removeCount = currentIndex - 3;
+    songQueue.splice(0, removeCount);
+    currentIndex -= removeCount;
+  }
+}
+
 function updateQueueUI() {
   const queueList = document.getElementById("queue-list");
   if (!queueList) return;
@@ -298,6 +306,7 @@ function showMetadata(fileId, signal) {
 }
 
 function playCurrentSong() {
+  trimQueue();
   if (currentIndex >= songQueue.length) {
     loadNextFromFileList();
     return;
