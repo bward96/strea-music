@@ -39,6 +39,36 @@
                 <a href="{{ url_for('auth.login') }}" class="btn">Login</a>
               {% endif %}
             </div>
+      <div class="navbar-left">
+        <a href="{{ url_for('main.home') }}">
+          <img src="/static/logo.png" alt="StreaMusic Logo" class="navbar-logo">
+        </a>
+      </div>
+      <div class="navbar-center">
+        <span class="navbar-title">STREAMusic</span>
+        {# or use an image if preferred #}
+        {# <img src="/static/logo-header.png" alt="STREAMusic" class="navbar-title-img"> #}
+      </div>
+      <div class="navbar-right nav-actions">
+        <button id="toggleQueue" class="btn">Queue</button>
+        <div class="hamburger-menu-wrapper">
+          <div class="hamburger-menu" id="hamburger-menu" onclick="toggleHamburgerMenu()">
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+          <div id="hamburger-menu-dropdown" class="hamburger-menu-dropdown">
+            {% if is_admin %}
+              <a href="{{ url_for('main.list_users') }}" class="btn">Admin</a>
+            {% endif %}
+            {% if session.get('access_token') %}
+              <form method="POST" action="{{ url_for('auth.logout') }}">
+                {{ logout_form.hidden_tag() }}
+                <button type="submit" class="btn">Logout</button>
+              </form>
+            {% else %}
+              <a href="{{ url_for('auth.login') }}" class="btn">Login</a>
+            {% endif %}
           </div>
         </div>
       </div>
