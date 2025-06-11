@@ -297,6 +297,18 @@ function showMetadata(fileId, signal) {
       } else {
         albumArtwork.src = "";
       }
+
+      const nowPlayingTitle = document.getElementById("now-playing-title");
+      const nowPlayingInfo = document.getElementById("now-playing-info");
+      if (nowPlayingTitle && data.title && data.title.trim() !== "") {
+        nowPlayingTitle.textContent = data.title;
+      }
+      if (nowPlayingInfo) {
+        const infoParts = [];
+        if (data.artist && data.artist.trim() !== "") infoParts.push(data.artist);
+        if (data.album && data.album.trim() !== "") infoParts.push(data.album);
+        nowPlayingInfo.textContent = infoParts.join(" - ");
+      }
       // album and duration information is no longer displayed in the UI
     })
     .catch(err => {
@@ -318,7 +330,8 @@ function playCurrentSong() {
   const fileUrl = `/stream/${song.fileId}`;
   const audio = document.getElementById("audio-player");
   const source = document.getElementById("audio-source");
-  const nowPlaying = document.getElementById("now-playing");
+  const nowPlayingTitle = document.getElementById("now-playing-title");
+  const nowPlayingInfo = document.getElementById("now-playing-info");
 
   source.src = fileUrl;
   audio.load();
@@ -327,7 +340,8 @@ function playCurrentSong() {
     setTimeout(() => { audio.controls = true; }, 50);
 	updatePlayPauseIcon(true); // This sets the button to pause
   }).catch(err => console.error("Playback error:", err));
-  nowPlaying.innerText = song.fileName;
+  if (nowPlayingTitle) nowPlayingTitle.innerText = song.fileName;
+  if (nowPlayingInfo) nowPlayingInfo.innerText = "";
   document.title = song.fileName + " - StreaMusic";
   updateQueueUI();
 
@@ -695,7 +709,7 @@ function handleDragEnd(e) {
 // ========== Lyrics Button ==========
 
 function openLyrics() {
-  const nowPlaying = document.getElementById("now-playing").innerText;
+  const nowPlaying = document.getElementById("now-playing-title").innerText;
   if (!nowPlaying) return;
   const searchQuery = encodeURIComponent(nowPlaying.trim());
   const geniusURL = `https://genius.com/search?q=${searchQuery}`;

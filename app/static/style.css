@@ -439,8 +439,15 @@ main.queue-active { margin-right: 250px; }
 #now-playing {
   flex-grow: 1;
   text-align: center;
-  font-size: 0.9rem;
   margin: 0 10px;
+}
+#now-playing-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+#now-playing-info {
+  font-size: 0.8rem;
+  color: #ccc;
 }
 .player-controls {
   display: flex;
