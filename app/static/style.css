@@ -436,6 +436,15 @@ main.queue-active { margin-right: 250px; }
   transition: transform 0.3s;
 }
 .metadata-panel img:hover { transform: scale(1.5); }
+#lyrics-button {
+  background: none;
+  border: none;
+  color: #fff;
+  padding: 0;
+  cursor: pointer;
+  font-family: 'Roboto', 'Montserrat', sans-serif;
+  margin-left: 6px;
+}
 #now-playing {
   flex-grow: 1;
   text-align: center;
@@ -478,6 +487,15 @@ main.queue-active { margin-right: 250px; }
   background-color: #1db954;
 }
 #shuffleBtn i, #repeatBtn i { color: #fff !important; }
+#toggleQueue {
+  background-color: transparent;
+  margin-left: 12px;
+  border-radius: 50%;
+  width: 36px; height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 #progress-bar {
   width: 120px;
   height: 6px;
