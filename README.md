@@ -1,6 +1,11 @@
-🎵 StreaMusic
+🎵 **StreaMusic**
+
+
+![image](https://github.com/user-attachments/assets/069620bb-cbd9-4e85-834b-174bf4252dfb)
 
 StreaMusic is a web app built with Python (Flask) that lets users connect to OneDrive and stream .mp3 files through a modern HTML5 music player. It includes features like keyboard controls, a music queue system, and file browsing with metadata.
+
+![image](https://github.com/user-attachments/assets/cce4ad7d-6b1e-4d8a-9447-6219961765e1)
 
 🔧 **Setup Instructions**
 1. Clone the Repository
