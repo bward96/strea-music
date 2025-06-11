@@ -294,16 +294,12 @@ body.files-bg .background {
 }
 .file-item .file-title {
   display: block;
-  font-weight: 600;
-  font-size: 1.15rem;
+  font-weight: 700;
+  font-size: 1.3rem;
 }
 .file-item .artist-album {
   display: block;
   font-size: 0.9rem;
-}
-.file-item .artist-album {
-  display: block;
-  font-size: 0.8rem;
   color: #ccc;
 }
 .file-item .actions {
@@ -440,17 +436,18 @@ main.queue-active { margin-right: 250px; }
   transition: transform 0.3s;
 }
 .metadata-panel img:hover { transform: scale(1.5); }
-.metadata-text {
-  font-size: 0.8rem;
-  line-height: 1.2;
-  color: #fff;
-  white-space: nowrap;
-}
 #now-playing {
   flex-grow: 1;
   text-align: center;
-  font-size: 0.9rem;
   margin: 0 10px;
+}
+#now-playing-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+#now-playing-info {
+  font-size: 0.8rem;
+  color: #ccc;
 }
 .player-controls {
   display: flex;
