@@ -373,35 +373,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // ========== Player Controls (Next/Prev/Shuffle/Repeat) ==========
 
-function nextSong() {
-  if (songQueue.length === 0) {
-    loadNextFromFileList();
-    return;
-  }
+window.nextSong = function () {
   if (repeatMode === "one") {
     playCurrentSong();
     return;
   }
-  if (currentIndex < songQueue.length - 1) {
-    currentIndex++;
+
+  if (shuffleOn) {
+    let randIndex;
+    if (fileList.length === 0) return;
+    do {
+      randIndex = Math.floor(Math.random() * fileList.length);
+    } while (songQueue[currentIndex] && fileList[randIndex].fileId === songQueue[currentIndex].fileId && fileList.length > 1);
+    songQueue.push({ fileId: fileList[randIndex].fileId, fileName: fileList[randIndex].fileName });
+    currentIndex = songQueue.length - 1;
   } else {
-    if (repeatMode === "all") {
-      currentIndex = 0;
-    } else if (shuffleOn && fileList.length > 0) {
-      let randIndex;
-      do {
-        randIndex = Math.floor(Math.random() * fileList.length);
-      } while (songQueue[currentIndex] && fileList[randIndex].fileId === songQueue[currentIndex].fileId && fileList.length > 1);
-      songQueue.push({ fileId: fileList[randIndex].fileId, fileName: fileList[randIndex].fileName });
-      currentIndex = songQueue.length - 1;
+    if (currentIndex < songQueue.length - 1) {
+      currentIndex++;
     } else {
       loadNextFromFileList();
       return;
     }
   }
+
   playCurrentSong();
   savePlayerState();
-}
+};
 function previousSong() {
   if (songQueue.length === 0) return;
   if (repeatMode === "one") {
@@ -643,12 +640,14 @@ function loadNextFromFileList() {
     const idx = fileList.findIndex(item => item.fileId === currId);
     if (idx >= 0 && idx < fileList.length - 1) {
       nextIndex = idx + 1;
+    } else if (idx === -1) {
+      nextIndex = 0;
     } else {
       return; // reached end of list with no repeat
     }
   }
-  const nextSong = fileList[nextIndex];
-  songQueue.push({ fileId: nextSong.fileId, fileName: nextSong.fileName });
+  const next = fileList[nextIndex];
+  songQueue.push({ fileId: next.fileId, fileName: next.fileName });
   currentIndex = songQueue.length - 1;
   playCurrentSong();
   savePlayerState();
