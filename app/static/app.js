@@ -163,9 +163,10 @@ function doSearch(query) {
   tempContainer.innerHTML = originalFileListHTML;
   const filteredItems = Array.from(tempContainer.querySelectorAll("li")).filter(li => {
     if (li.classList.contains("back-btn")) return true;
-    const nameElem = li.querySelector(".name");
-    if (!nameElem) return false;
-    return nameElem.innerText.toLowerCase().includes(query);
+    const titleElem = li.querySelector(".file-title");
+    const artistAlbumElem = li.querySelector(".artist-album");
+    const text = [(titleElem ? titleElem.innerText : ''), (artistAlbumElem ? artistAlbumElem.innerText : '')].join(' ').toLowerCase();
+    return text.includes(query);
   });
   container.innerHTML = filteredItems.map(li => li.outerHTML).join("");
   initLazyLoading();
@@ -538,6 +539,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // ========== Lazy Loading Album Art ==========
 
+function updateItemMetadata(itemElem, data) {
+  if (!itemElem) return;
+  const titleElem = itemElem.querySelector('.file-title');
+  const artistAlbumElem = itemElem.querySelector('.artist-album');
+  if (titleElem && data.title && data.title.trim() !== '') {
+    titleElem.textContent = data.title;
+  }
+  if (artistAlbumElem) {
+    const parts = [];
+    if (data.artist && data.artist.trim() !== '') parts.push(data.artist);
+    if (data.album && data.album.trim() !== '') parts.push(data.album);
+    artistAlbumElem.textContent = parts.join(' - ');
+  }
+}
+
 function initLazyLoading() {
   if ("IntersectionObserver" in window) {
     const observer = new IntersectionObserver((entries, obs) => {
@@ -545,8 +561,12 @@ function initLazyLoading() {
         if (entry.isIntersecting) {
           const imgElem = entry.target;
           const fileId = imgElem.getAttribute("data-fileid");
+          const itemElem = imgElem.closest('.file-item');
           if (metadataCache[fileId]) {
-            imgElem.src = metadataCache[fileId];
+            if (metadataCache[fileId].album_art && metadataCache[fileId].album_art.trim() !== "") {
+              imgElem.src = metadataCache[fileId].album_art;
+            }
+            updateItemMetadata(itemElem, metadataCache[fileId]);
             obs.unobserve(imgElem);
           } else {
             const encodedFileId = encodeURIComponent(fileId);
@@ -560,8 +580,9 @@ function initLazyLoading() {
                 }
                 if (data.album_art && data.album_art.trim() !== "") {
                   imgElem.src = data.album_art;
-                  metadataCache[fileId] = data.album_art;
                 }
+                metadataCache[fileId] = data;
+                updateItemMetadata(itemElem, data);
                 obs.unobserve(imgElem);
               })
               .catch(err => console.error("Error fetching album art for", fileId, err));
@@ -575,8 +596,12 @@ function initLazyLoading() {
     const thumbnails = document.querySelectorAll(".file-thumbnail");
     thumbnails.forEach(function (imgElem) {
       const fileId = imgElem.getAttribute("data-fileid");
+      const itemElem = imgElem.closest('.file-item');
       if (metadataCache[fileId]) {
-        imgElem.src = metadataCache[fileId];
+        if (metadataCache[fileId].album_art && metadataCache[fileId].album_art.trim() !== "") {
+          imgElem.src = metadataCache[fileId].album_art;
+        }
+        updateItemMetadata(itemElem, metadataCache[fileId]);
       } else {
         const encodedFileId = encodeURIComponent(fileId);
         fetch(`/metadata/${encodedFileId}`)
@@ -589,8 +614,9 @@ function initLazyLoading() {
             }
             if (data.album_art && data.album_art.trim() !== "") {
               imgElem.src = data.album_art;
-              metadataCache[fileId] = data.album_art;
             }
+            metadataCache[fileId] = data;
+            updateItemMetadata(itemElem, data);
           })
           .catch(err => console.error("Error fetching album art for", fileId, err));
       }
@@ -604,7 +630,7 @@ function updateGlobalFileList() {
   const items = document.querySelectorAll(".file-item");
   fileList = Array.from(items).map(item => {
     const fileId = item.querySelector(".file-thumbnail").getAttribute("data-fileid");
-    const fileName = item.querySelector(".name").innerText;
+    const fileName = item.querySelector(".file-title").innerText;
     return { fileId, fileName };
   });
 }
