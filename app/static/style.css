@@ -300,6 +300,10 @@ body.files-bg .background {
 .file-item .artist-album {
   display: block;
   font-size: 0.9rem;
+}
+.file-item .artist-album {
+  display: block;
+  font-size: 0.8rem;
   color: #ccc;
 }
 .file-item .actions {
