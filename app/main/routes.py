@@ -72,13 +72,43 @@ def stream_file(file_id):
     headers = get_auth_headers()
     if not headers:
         return redirect(url_for("auth.login"))
-    res = http.get(f"{GRAPH_BASE_URL}/me/drive/items/{file_id}/content", headers=headers, stream=True)
-    if res.status_code != 200:
+
+    # forward Range header if present
+    range_header = request.headers.get("Range")
+    if range_header:
+        headers["Range"] = range_header
+
+    res = http.get(
+        f"{GRAPH_BASE_URL}/me/drive/items/{file_id}/content",
+        headers=headers,
+        stream=True,
+    )
+
+    if res.status_code not in (200, 206):
         return jsonify({"error": "Failed to stream file"}), res.status_code
+
+    response_headers = {
+        "Content-Type": res.headers.get("Content-Type", "application/octet-stream"),
+    }
+
+    # propagate content length
+    content_length = res.headers.get("Content-Length")
+    if content_length:
+        response_headers["Content-Length"] = content_length
+
+    status_code = 200
+
+    # include range headers when partial content is returned
+    content_range = res.headers.get("Content-Range")
+    if content_range:
+        response_headers["Content-Range"] = content_range
+        response_headers["Accept-Ranges"] = "bytes"
+        status_code = 206
 
     return Response(
         res.iter_content(chunk_size=1024),
-        content_type=res.headers.get("Content-Type", "application/octet-stream")
+        status=status_code,
+        headers=response_headers,
     )
 
 
