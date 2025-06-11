@@ -35,9 +35,6 @@ Create a .env file in the root directory of the project with the following conte
     
     FLASK_SECRET_KEY=your_flask_secret_key
     
-    DATABASE_URL=sqlite:///instance/app.db
-    
-    JWT_SECRET=your_jwt_secret
 
 ⚠️ Never commit your .env file to GitHub. It contains secrets that should remain private.
 
