@@ -295,14 +295,15 @@ body.files-bg .background {
 .file-item .file-title {
   display: block;
   font-weight: 600;
+  font-size: 1.15rem;
 }
 .file-item .artist-album {
   display: block;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: #ccc;
 }
 .file-item .actions {
-  margin-left: 18px;
+  margin-left: auto;
 }
 .folder-item,
 .file-item,
