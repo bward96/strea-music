@@ -436,6 +436,13 @@ main.queue-active { margin-right: 250px; }
   transition: transform 0.3s;
 }
 .metadata-panel img:hover { transform: scale(1.5); }
+#lyrics-button {
+  background: none;
+  border: none;
+  color: #fff;
+  padding: 0;
+  cursor: pointer;
+}
 #now-playing {
   flex-grow: 1;
   text-align: center;

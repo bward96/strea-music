@@ -17,7 +17,6 @@
         {# <img src="/static/logo-header.png" alt="STREAMusic" class="navbar-title-img"> #}
       </div>
       <div class="navbar-right nav-actions">
-        <button id="toggleQueue" class="btn">Queue</button>
         <div class="hamburger-menu-wrapper">
           <div class="hamburger-menu" id="hamburger-menu" onclick="toggleHamburgerMenu()">
             <div></div>
@@ -92,7 +91,7 @@
   <div id="media-player-container">
       <div class="metadata-panel">
         <img id="album-artwork" src="" alt="Album Artwork">
-        <button id="lyrics-button" class="btn" onclick="openLyrics()">Lyrics</button>
+        <button id="lyrics-button" onclick="openLyrics()">Lyrics</button>
       </div>
     <div id="now-playing">
       <div id="now-playing-title" class="np-title"></div>
@@ -113,6 +112,7 @@
       <input type="range" id="volume-slider" min="0" max="100" step="1" value="50">
       <button class="btn" id="shuffleBtn" onclick="toggleShuffle()"><i class="fas fa-random"></i></button>
       <button class="btn" id="repeatBtn" onclick="toggleRepeat()"><i class="fas fa-redo"></i></button>
+      <button class="btn" id="toggleQueue">Q</button>
     </div>
   </div>
   
