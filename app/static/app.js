@@ -81,6 +81,91 @@ var repeatMode = "none";
 var fileList = [];
 var metadataCache = {};
 var currentMetadataController = null;
+var metadataQueue = [];
+var queuedFiles = new Set();
+var metadataQueueHandle = null;
+var metadataQueuePaused = false;
+var metadataQueueController = null;
+
+function scheduleMetadataQueue() {
+  if (metadataQueueHandle || metadataQueuePaused || metadataQueue.length === 0) return;
+  if ('requestIdleCallback' in window) {
+    metadataQueueHandle = requestIdleCallback(processMetadataQueue);
+  } else {
+    metadataQueueHandle = setTimeout(() => processMetadataQueue({ timeRemaining: () => 0, didTimeout: true }), 200);
+  }
+}
+
+function processMetadataQueue(deadline) {
+  metadataQueueHandle = null;
+  if (metadataQueuePaused) return;
+  while ((deadline.timeRemaining() > 0 || deadline.didTimeout) && metadataQueue.length > 0 && !metadataQueuePaused) {
+    const { fileId, imgElem, itemElem } = metadataQueue.shift();
+    queuedFiles.delete(fileId);
+    if (metadataCache[fileId]) {
+      if (metadataCache[fileId].album_art && metadataCache[fileId].album_art.trim() !== "") {
+        imgElem.src = metadataCache[fileId].album_art;
+      }
+      updateItemMetadata(itemElem, metadataCache[fileId]);
+      continue;
+    }
+    metadataQueueController = new AbortController();
+    const encodedFileId = encodeURIComponent(fileId);
+    fetch(`/metadata/${encodedFileId}`, { signal: metadataQueueController.signal })
+      .then(checkAuthResponse)
+      .then(res => res.json())
+      .then(data => {
+        if (data.error && data.error === "InvalidAuthenticationToken") {
+          window.location.href = "/";
+          return;
+        }
+        if (data.album_art && data.album_art.trim() !== "") {
+          imgElem.src = data.album_art;
+        }
+        metadataCache[fileId] = data;
+        updateItemMetadata(itemElem, data);
+      })
+      .catch(err => {
+        if (err.name !== 'AbortError') {
+          console.error('Error fetching album art for', fileId, err);
+        }
+      })
+      .finally(() => {
+        metadataQueueController = null;
+        scheduleMetadataQueue();
+      });
+    return;
+  }
+  if (metadataQueue.length > 0 && !metadataQueuePaused) {
+    scheduleMetadataQueue();
+  }
+}
+
+function enqueueMetadataRequest(fileId, imgElem, itemElem) {
+  if (queuedFiles.has(fileId) || metadataCache[fileId]) return;
+  queuedFiles.add(fileId);
+  metadataQueue.push({ fileId, imgElem, itemElem });
+  scheduleMetadataQueue();
+}
+
+function pauseMetadataQueue() {
+  metadataQueuePaused = true;
+  if (metadataQueueHandle) {
+    if ('cancelIdleCallback' in window) cancelIdleCallback(metadataQueueHandle);
+    else clearTimeout(metadataQueueHandle);
+    metadataQueueHandle = null;
+  }
+  if (metadataQueueController) {
+    metadataQueueController.abort();
+    metadataQueueController = null;
+  }
+}
+
+function resumeMetadataQueue() {
+  if (!metadataQueuePaused) return;
+  metadataQueuePaused = false;
+  scheduleMetadataQueue();
+}
 
 // ========== Search Bar Events ==========
 
@@ -118,6 +203,7 @@ function checkAuthResponse(response) {
 }
 
 function fetchFolder(folderId) {
+  pauseMetadataQueue();
   fetch(`/get_files?folder_id=${encodeURIComponent(folderId)}`)
     .then(checkAuthResponse)
     .then(response => response.text())
@@ -130,6 +216,11 @@ function fetchFolder(folderId) {
       originalFileListHTML = newFileList;
       initLazyLoading();
       updateGlobalFileList();
+      if (window.requestIdleCallback) {
+        requestIdleCallback(resumeMetadataQueue);
+      } else {
+        setTimeout(resumeMetadataQueue, 500);
+      }
     })
     .catch(err => console.error("Error loading folder:", err));
 }
@@ -321,6 +412,7 @@ function showMetadata(fileId, signal) {
 }
 
 function playCurrentSong() {
+  pauseMetadataQueue();
   trimQueue();
   if (currentIndex >= songQueue.length) {
     loadNextFromFileList();
@@ -359,6 +451,11 @@ function playCurrentSong() {
     }, 500);
   }
   savePlayerState();
+  if (window.requestIdleCallback) {
+    requestIdleCallback(resumeMetadataQueue);
+  } else {
+    setTimeout(resumeMetadataQueue, 500);
+  }
 }
 
 // Ended event for next song/repeat/shuffle
@@ -568,19 +665,22 @@ function updateItemMetadata(itemElem, data) {
 }
 
 function initLazyLoading() {
+  metadataQueue = [];
+  queuedFiles.clear();
   if ("IntersectionObserver" in window) {
     const observer = new IntersectionObserver((entries, obs) => {
       entries.forEach(entry => {
+        const imgElem = entry.target;
+        const fileId = imgElem.getAttribute("data-fileid");
+        const itemElem = imgElem.closest('.file-item');
         if (entry.isIntersecting) {
-          const imgElem = entry.target;
-          const fileId = imgElem.getAttribute("data-fileid");
-          const itemElem = imgElem.closest('.file-item');
           if (metadataCache[fileId]) {
             if (metadataCache[fileId].album_art && metadataCache[fileId].album_art.trim() !== "") {
               imgElem.src = metadataCache[fileId].album_art;
             }
             updateItemMetadata(itemElem, metadataCache[fileId]);
             obs.unobserve(imgElem);
+            queuedFiles.delete(fileId);
           } else {
             const encodedFileId = encodeURIComponent(fileId);
             fetch(`/metadata/${encodedFileId}`)
@@ -600,6 +700,8 @@ function initLazyLoading() {
               })
               .catch(err => console.error("Error fetching album art for", fileId, err));
           }
+        } else {
+          enqueueMetadataRequest(fileId, imgElem, itemElem);
         }
       });
     }, { rootMargin: "100px" });
@@ -610,31 +712,10 @@ function initLazyLoading() {
     thumbnails.forEach(function (imgElem) {
       const fileId = imgElem.getAttribute("data-fileid");
       const itemElem = imgElem.closest('.file-item');
-      if (metadataCache[fileId]) {
-        if (metadataCache[fileId].album_art && metadataCache[fileId].album_art.trim() !== "") {
-          imgElem.src = metadataCache[fileId].album_art;
-        }
-        updateItemMetadata(itemElem, metadataCache[fileId]);
-      } else {
-        const encodedFileId = encodeURIComponent(fileId);
-        fetch(`/metadata/${encodedFileId}`)
-          .then(checkAuthResponse)
-          .then(response => response.json())
-          .then(data => {
-            if (data.error && data.error === "InvalidAuthenticationToken") {
-              window.location.href = "/";
-              return;
-            }
-            if (data.album_art && data.album_art.trim() !== "") {
-              imgElem.src = data.album_art;
-            }
-            metadataCache[fileId] = data;
-            updateItemMetadata(itemElem, data);
-          })
-          .catch(err => console.error("Error fetching album art for", fileId, err));
-      }
+      enqueueMetadataRequest(fileId, imgElem, itemElem);
     });
   }
+  resumeMetadataQueue();
 }
 
 // ========== Global File List for Shuffle ==========
