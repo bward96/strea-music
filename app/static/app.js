@@ -165,6 +165,11 @@ function resumeMetadataQueue() {
   if (!metadataQueuePaused) return;
   metadataQueuePaused = false;
   scheduleMetadataQueue();
+var lazyLoadControllers = [];
+
+function abortLazyLoadingRequests() {
+  lazyLoadControllers.forEach(ctrl => ctrl.abort());
+  lazyLoadControllers = [];
 }
 
 // ========== Search Bar Events ==========
@@ -204,6 +209,7 @@ function checkAuthResponse(response) {
 
 function fetchFolder(folderId) {
   pauseMetadataQueue();
+  abortLazyLoadingRequests();
   fetch(`/get_files?folder_id=${encodeURIComponent(folderId)}`)
     .then(checkAuthResponse)
     .then(response => response.text())
@@ -241,6 +247,7 @@ window.addEventListener("popstate", (event) => {
 // ========== File List Search ==========
 
 function doSearch(query) {
+  abortLazyLoadingRequests();
   const container = document.getElementById("fileListContainer");
   query = query.trim().toLowerCase();
   if (!query) {
@@ -360,6 +367,7 @@ function loadPlayerState() {
 }
 
 function selectFile(fileId, fileName) {
+  abortLazyLoadingRequests();
   fileName = fileName.replace(/&#39;/g, "'");
   if (songQueue.length > 0) {
     songQueue[currentIndex] = { fileId, fileName };
@@ -667,6 +675,7 @@ function updateItemMetadata(itemElem, data) {
 function initLazyLoading() {
   metadataQueue = [];
   queuedFiles.clear();
+  lazyLoadControllers = [];
   if ("IntersectionObserver" in window) {
     const observer = new IntersectionObserver((entries, obs) => {
       entries.forEach(entry => {
@@ -683,7 +692,9 @@ function initLazyLoading() {
             queuedFiles.delete(fileId);
           } else {
             const encodedFileId = encodeURIComponent(fileId);
-            fetch(`/metadata/${encodedFileId}`)
+            const controller = new AbortController();
+            lazyLoadControllers.push(controller);
+            fetch(`/metadata/${encodedFileId}`, { signal: controller.signal })
               .then(checkAuthResponse)
               .then(response => response.json())
               .then(data => {
@@ -698,7 +709,10 @@ function initLazyLoading() {
                 updateItemMetadata(itemElem, data);
                 obs.unobserve(imgElem);
               })
-              .catch(err => console.error("Error fetching album art for", fileId, err));
+              .catch(err => console.error("Error fetching album art for", fileId, err))
+              .finally(() => {
+                lazyLoadControllers = lazyLoadControllers.filter(c => c !== controller);
+              });
           }
         } else {
           enqueueMetadataRequest(fileId, imgElem, itemElem);
@@ -713,6 +727,34 @@ function initLazyLoading() {
       const fileId = imgElem.getAttribute("data-fileid");
       const itemElem = imgElem.closest('.file-item');
       enqueueMetadataRequest(fileId, imgElem, itemElem);
+      if (metadataCache[fileId]) {
+        if (metadataCache[fileId].album_art && metadataCache[fileId].album_art.trim() !== "") {
+          imgElem.src = metadataCache[fileId].album_art;
+        }
+        updateItemMetadata(itemElem, metadataCache[fileId]);
+      } else {
+        const encodedFileId = encodeURIComponent(fileId);
+        const controller = new AbortController();
+        lazyLoadControllers.push(controller);
+        fetch(`/metadata/${encodedFileId}`, { signal: controller.signal })
+          .then(checkAuthResponse)
+          .then(response => response.json())
+          .then(data => {
+            if (data.error && data.error === "InvalidAuthenticationToken") {
+              window.location.href = "/";
+              return;
+            }
+            if (data.album_art && data.album_art.trim() !== "") {
+              imgElem.src = data.album_art;
+            }
+            metadataCache[fileId] = data;
+            updateItemMetadata(itemElem, data);
+          })
+          .catch(err => console.error("Error fetching album art for", fileId, err))
+          .finally(() => {
+            lazyLoadControllers = lazyLoadControllers.filter(c => c !== controller);
+          });
+      }
     });
   }
   resumeMetadataQueue();
