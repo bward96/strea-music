@@ -8,6 +8,11 @@ html, body {
   background: none; /* Let .background do its work */
 }
 
+/* Add a transition for the main content area's margin */
+main {
+  transition: margin-right 0.3s ease-in-out;
+}
+
 /* ========== BACKGROUND IMAGE FOR ALL PAGES ========== */
 .background {
   position: fixed;
@@ -175,13 +180,9 @@ body.files-bg .background {
   border-radius: 20px;
   font-size: 1.06rem;
   box-sizing: border-box;
-  transition: background 0.2s, transform 0.2s;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.hamburger-menu-dropdown .btn:hover {
-  background: #17a847;
 }
 
 /* ========== BUTTONS ========== */
@@ -195,18 +196,21 @@ body.files-bg .background {
   font-size: 1.05rem;
   border: none;
   cursor: pointer;
-  transition: background 0.3s, transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  transition: all 0.25s ease-in-out;
 }
 .button:hover, .btn:hover {
-  background-color: #17a847;
-  transform: translateY(-1px) scale(1.04);
+  background-color: #1ed760;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(29, 185, 84, 0.45);
 }
 .queue-btn.btn {
   padding: 3px 10px;
   font-size: 0.87rem;
   border-radius: 14px;
   min-width: 0;
-  margin-left: 8px;
+  margin-left: auto; /* Push it to the right */
+  flex-shrink: 0; /* Prevent it from shrinking */
 }
 
 /* ========== SEARCH BAR ========== */
@@ -237,7 +241,7 @@ body.files-bg .background {
 
 /* ========== FILES LIST ========== */
 .files-section {
-  padding: 20px 30px 120px 30px; /* bottom padding for player bar */
+  padding: 20px 30px 120px 30px;
   background: none !important;
 }
 .file-list {
@@ -291,6 +295,7 @@ body.files-bg .background {
   flex: 1 1 auto;
   padding-right: 12px;
   cursor: pointer;
+  min-width: 0;
 }
 .file-item .file-title {
   display: block;
@@ -310,7 +315,10 @@ body.files-bg .background {
 .file-item .file-info {
   cursor: pointer;
 }
-main.queue-active { margin-right: 250px; }
+main.queue-active {
+  /* Increased margin to add space between file list and queue */
+  margin-right: 280px;
+}
 
 /* ========== QUEUE SIDEBAR ========== */
 .queue-container ul {
@@ -319,68 +327,77 @@ main.queue-active { margin-right: 250px; }
   margin: 0;
 }
 
+/* --- REVISED QUEUE ITEM STYLES --- */
 .queue-song {
   display: flex;
   align-items: center;
-  background: rgba(0,0,0,0.19);
-  border-radius: 10px;
-  margin-bottom: 12px;
-  padding: 10px 12px 10px 18px;
-  font-size: 1.03rem;
-  color: #fff;
-  transition: background 0.22s, color 0.18s;
-  position: relative;
-  gap: 10px;
+  gap: 12px;
+  padding: 8px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  background: transparent;
+  transition: background-color 0.2s ease;
 }
-
+.queue-song:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
 .queue-song.active {
   background: #1db954;
-  color: #fff;
-  font-weight: 700;
-  box-shadow: 0 2px 14px rgba(29,185,84,0.13);
 }
-
-.queue-title {
-  flex: 1 1 auto;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  padding-right: 6px;
+.queue-thumbnail {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    object-fit: cover;
+    flex-shrink: 0;
 }
-
-.remove-btn {
-  background: #181818;
-  border: none;
-  color: #1db954;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  font-size: 1.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.15s, color 0.18s;
-  margin-left: 8px;
+.queue-item-info {
+    flex-grow: 1;
+    min-width: 0; /* Important for text ellipsis */
 }
-
-.remove-btn:hover {
-  background: #1db954;
-  color: #fff;
+.queue-item-title {
+    display: block;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.95rem;
 }
+.queue-item-artist-album {
+    display: block;
+    font-size: 0.8rem;
+    color: #b3b3b3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.queue-song .remove-btn {
+    background: transparent;
+    color: #b3b3b3;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+.queue-song .remove-btn:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+/* --- END REVISED QUEUE STYLES --- */
 
 .queue-container {
   position: fixed;
   right: -300px;
-  top: 80px;
+  top: 70px;
   bottom: 80px;
-  width: 250px;
-  background: #1f1f1f;
+  width: 280px; /* Increased width to accommodate padding */
+  background: rgba(31, 31, 31, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
   color: #fff;
   padding: 20px;
+  box-sizing: border-box;
   overflow-y: auto;
-  transition: right 0.3s;
-  border-left: 2px solid #1db954;
+  transition: right 0.3s ease-in-out;
   z-index: 101;
   pointer-events: none;
 }
@@ -419,10 +436,11 @@ main.queue-active { margin-right: 250px; }
   bottom: 0; left: 0;
   width: 100%;
   background: #1f1f1f;
-  padding: 10px 15px;
+  padding: 10px 25px;
   box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
   z-index: 200;
   height: 80px;
+  box-sizing: border-box;
 }
 .metadata-panel {
   display: flex;
@@ -430,7 +448,6 @@ main.queue-active { margin-right: 250px; }
   gap: 10px;
   height: 100%;
 }
-/* Album artwork fills the player bar height without zoom on hover */
 .metadata-panel img {
   height: 100%;
   aspect-ratio: 1 / 1;
@@ -459,44 +476,57 @@ main.queue-active { margin-right: 250px; }
   font-size: 0.8rem;
   color: #ccc;
 }
+
+/* --- REVISED PLAYER CONTROLS --- */
 .player-controls {
   display: flex;
   align-items: center;
-  position: relative;
+  justify-content: center;
+  gap: 10px;
 }
-.player-controls button {
-  background: none;
-  color: #fff;
-  font-size: 1rem;
-  margin: 0 5px;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-.player-controls button:hover { transform: scale(1.1); }
-#shuffleBtn, #repeatBtn {
+
+.player-controls .btn {
   background-color: transparent;
-  margin-right: 20px;
+  color: #fff;
   border-radius: 50%;
-  width: 36px; height: 36px;
-  display: flex;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  margin: 0;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  font-size: 1rem;
+  box-shadow: none; /* Override default button shadow */
 }
+
+/* Make the main play/pause button larger */
+.player-controls .btn#playPauseBtn {
+    width: 48px;
+    height: 48px;
+    font-size: 1.1rem;
+}
+
+/* Uniform hover for all player buttons */
+.player-controls .btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px) scale(1.05); /* Give a slight pop effect */
+  box-shadow: none; /* Override glow effect for a flatter look */
+}
+
+/* Style for the ACTIVE toggle buttons */
 #shuffleBtn.active,
 #repeatBtn.active {
   background-color: #1db954;
+  color: #fff;
 }
-#shuffleBtn i, #repeatBtn i { color: #fff !important; }
-#toggleQueue {
-  background-color: transparent;
-  margin-left: 12px;
-  border-radius: 50%;
-  width: 36px; height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+
+/* Hover state for an ACTIVE toggle button */
+#shuffleBtn.active:hover,
+#repeatBtn.active:hover {
+  background-color: #1ed760; /* Use brighter green from main button hover */
 }
+
 #progress-bar {
   width: 120px;
   height: 6px;
@@ -554,7 +584,6 @@ main.queue-active { margin-right: 250px; }
     #444 var(--volplayed, 50%),
     #444 100%
   );
-  /* Remove default blue for Chrome */
   accent-color: #1db954;
 }
 
@@ -570,7 +599,7 @@ main.queue-active { margin-right: 250px; }
 }
 #volume-slider::-webkit-slider-runnable-track {
   background: transparent;
-  height: 6px;
+  height: 9px;
 }
 
 /* Firefox */
@@ -593,13 +622,11 @@ main.queue-active { margin-right: 250px; }
   background: #444;
 }
 
-/* Remove outline in Firefox/Edge */
 #volume-slider:focus {
   outline: none;
   border: none;
 }
 
-/* JS to update --volplayed */
 #current-time, #duration {
   color: #ccc;
   font-size: 0.8rem;
@@ -607,34 +634,17 @@ main.queue-active { margin-right: 250px; }
   text-align: center;
 }
 
-/* ========== VOLUME CONTROL ========== */
 #volume-icon {
   font-size: 20px;
   color: #1db954;
   margin-left: 12px;
 }
-#volume-slider {
-  width: 80px; height: 6px;
-  background: linear-gradient(
-    to right,
-    #1db954 0%,
-    #1db954 var(--volplayed, 50%),
-    #444 var(--volplayed, 50%),
-    #444 100%
-  );
-  border-radius: 10px;
-  border: none;
-  outline: none;
-  box-shadow: none;
-  transition: background 0.1s;
-}
-#volume-slider:focus { outline: none; border: none; }
 
 /* ========== RESPONSIVE DESIGN ========== */
 @media screen and (max-width: 900px) {
   .navbar-center .navbar-title { font-size: 1.7rem; }
   .navbar { padding: 10px 12px; }
-  #media-player-container { height: 90px; padding: 5px; }
+  #media-player-container { height: 90px; padding: 5px 15px; }
   .files-section { padding: 15px 4vw 120px 4vw; }
 }
 @media screen and (max-width: 600px) {
@@ -651,3 +661,14 @@ main.queue-active { margin-right: 250px; }
 ::-webkit-scrollbar-thumb { background: #222; border-radius: 5px; }
 ::-webkit-scrollbar-thumb:hover { background: #1db954; }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

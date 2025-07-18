@@ -2,25 +2,8 @@
 {% block title %}Browse Files - StreaMusic{% endblock %}
 {% block bodyclass %}files-bg{% endblock %}
 
-{% block head %}
-  {{ super() }}
-  <style>
-    /* This class is for accessibility. It can be moved to your main CSS file. */
-    .visually-hidden {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
-    }
-  </style>
-{% endblock %}
-
 {% block content %}
+  <!-- NAVBAR WITH LOGO, CENTERED TITLE, QUEUE, HAMBURGER -->
   <header>
     <nav class="navbar">
       <div class="navbar-left">
@@ -30,10 +13,12 @@
       </div>
       <div class="navbar-center">
         <span class="navbar-title">STREAMusic</span>
+        {# or use an image if preferred #}
+        {# <img src="/static/logo-header.png" alt="STREAMusic" class="navbar-title-img"> #}
       </div>
       <div class="navbar-right nav-actions">
         <div class="hamburger-menu-wrapper">
-          <div class="hamburger-menu" id="hamburger-menu">
+          <div class="hamburger-menu" id="hamburger-menu" onclick="toggleHamburgerMenu()">
             <div></div>
             <div></div>
             <div></div>
@@ -56,35 +41,36 @@
     </nav>
   </header>
 
+  <!-- MAIN FILES SECTION -->
   <main>
     <section class="files-section">
       <div class="search-container">
         <input type="search" id="searchInput" placeholder="Search files...">
-        <button id="clearSearchBtn" class="clear-icon" aria-label="Clear search">&times;</button>
+        <span class="clear-icon" onclick="clearSearch()">&times;</span>
       </div>
       <ul class="file-list" id="fileListContainer">
         {% if folder_id != "root" %}
-          <li class="back-btn" id="back-btn" role="button" tabindex="0">
-            <i class="fas fa-arrow-left" aria-hidden="true"></i>
+          <li class="back-btn" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i>
             <span>Back</span>
           </li>
         {% endif %}
         {% for file in files %}
-          {% if file.get("folder") or (file["name"]|lower).endswith(".mp3") %}
+          {% if file.get("folder") or (file["name"]|lower)[-4:] == ".mp3" %}
             {% if file.get("folder") %}
-              <li class="folder-item" data-folder-id="{{ file['id'] }}" role="button" tabindex="0">
-                <i class="fas fa-folder folder-icon" aria-hidden="true"></i>
+              <li class="folder-item" onclick="navigateToFolder('{{ file['id'] }}')">
+                <i class="fas fa-folder folder-icon"></i>
                 <span class="name">{{ file['name'] }}</span>
               </li>
             {% else %}
-              <li class="file-item" data-file-id="{{ file['id'] }}" data-file-name="{{ file['name']|replace('.mp3','')|replace('.MP3','')|replace("'", '&#39;') }}">
-                <img class="file-thumbnail" src="/static/default-thumbnail.png" alt=""/>
-                <div class="file-info">
+              <li class="file-item">
+                <img class="file-thumbnail" data-fileid="{{ file['id'] }}" src="/static/default-thumbnail.png" alt=""/>
+                <div class="file-info" onclick="selectFile('{{ file['id'] }}', '{{ file['name']|replace('.mp3','')|replace('.MP3','')|replace("'", '&#39;') }}')">
                   <span class="file-title">{{ file['name']|replace('.mp3','')|replace('.MP3','') }}</span>
                   <span class="artist-album"></span>
                 </div>
                 <div class="actions">
-                  <button class="queue-btn btn" aria-label="Add to queue">+ Queue</button>
+                  <button class="queue-btn btn" onclick="addToQueue('{{ file['id'] }}', '{{ file['name']|replace('.mp3','')|replace('.MP3','')|replace("'", '&#39;') }}')">+ Queue</button>
                 </div>
               </li>
             {% endif %}
@@ -94,41 +80,44 @@
     </section>
   </main>
 
+  <!-- QUEUE SIDEBAR -->
   <aside id="queue-container" class="queue-container">
     <h3>Queue</h3>
-    <button id="clearQueue" class="btn">Clear All</button>
+    <button id="clearQueue" class="btn" onclick="clearQueue()">Clear All</button>
     <ul id="queue-list"></ul>
   </aside>
 
-  <footer id="media-player-container">
-    <div class="metadata-panel">
-      <img id="album-artwork" src="/static/default-thumbnail.png" alt="Album artwork">
-      <button id="lyrics-button">Lyrics</button>
-    </div>
+  <!-- MEDIA PLAYER BAR -->
+  <div id="media-player-container">
+      <div class="metadata-panel">
+        <img id="album-artwork" src="" alt="">
+        <button id="lyrics-button" onclick="openLyrics()">Lyrics</button>
+      </div>
     <div id="now-playing">
       <div id="now-playing-title" class="np-title"></div>
       <div id="now-playing-info" class="np-info"></div>
     </div>
+    <p id="now-playing"></p>
     <audio id="audio-player" preload="none" style="display:none;">
       <source id="audio-source" src="" type="audio/mp3">
     </audio>
     <div class="player-controls">
-      <button class="btn" id="previousBtn" aria-label="Previous Song"><i class="fas fa-step-backward" aria-hidden="true"></i></button>
-      <button class="btn" id="playPauseBtn" aria-label="Play"><i class="fas fa-play" aria-hidden="true"></i></button>
-      <button class="btn" id="nextBtn" aria-label="Next Song"><i class="fas fa-step-forward" aria-hidden="true"></i></button>
-      <label for="progress-bar" class="visually-hidden">Song Progress</label>
+      <button class="btn" onclick="previousSong()"><i class="fas fa-step-backward"></i></button>
+      <button class="btn" id="playPauseBtn" onclick="togglePlayPause()"><i class="fas fa-play"></i></button>
+      <button class="btn" onclick="nextSong()"><i class="fas fa-step-forward"></i></button>
       <span id="current-time">0:00</span>
       <input type="range" id="progress-bar" value="0" min="0" max="100" step="1" />
       <span id="duration">0:00</span>
-      <i id="volume-icon" class="fas fa-volume-up" aria-hidden="true"></i>
-      <label for="volume-slider" class="visually-hidden">Volume</label>
+      <i id="volume-icon" class="fas fa-volume-up"></i>
       <input type="range" id="volume-slider" min="0" max="100" step="1" value="50">
-      <button class="btn" id="shuffleBtn" aria-label="Shuffle"><i class="fas fa-random" aria-hidden="true"></i></button>
-      <button class="btn" id="repeatBtn" aria-label="Repeat"><i class="fas fa-redo" aria-hidden="true"></i></button>
-      <button class="btn" id="toggleQueue" aria-label="Toggle Queue">Q</button>
+      <button class="btn" id="shuffleBtn" onclick="toggleShuffle()"><i class="fas fa-random"></i></button>
+      <button class="btn" id="repeatBtn" onclick="toggleRepeat()"><i class="fas fa-redo"></i></button>
+      <button class="btn" id="toggleQueue">Q</button>
     </div>
-  </footer>
+  </div>
   
+
+  <!-- SCRIPTS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/js/all.min.js"></script>
   <script src="{{ url_for('static', filename='app.js') }}"></script>
 {% endblock %}

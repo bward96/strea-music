@@ -2,6 +2,8 @@ import base64
 import requests
 import logging
 import csv
+import concurrent.futures
+from urllib.parse import quote
 from io import BytesIO, StringIO
 from flask import Blueprint, render_template, session, request, redirect, url_for, jsonify, Response, flash
 from mutagen.mp3 import MP3
@@ -142,6 +144,42 @@ def metadata(file_id):
         return jsonify({"error": "An internal error occurred."}), 500
 
 
+def fetch_and_process_metadata(file_id, headers):
+    """
+    Fetches content for a single file and processes its metadata.
+    Designed to be run in a separate thread.
+    """
+    if not file_id:
+        return file_id, {}
+    try:
+        # URL-encode the file_id to handle special characters.
+        encoded_file_id = quote(file_id)
+        res = http_metadata.get(
+            f"{GRAPH_BASE_URL}/me/drive/items/{encoded_file_id}/content",
+            headers=headers,
+            timeout=10
+        )
+        if res.status_code == 200:
+            audio = MP3(BytesIO(res.content))
+            tags = audio.tags or {}
+            meta = {
+                "title": tags.get("TIT2", {}).text[0] if tags.get("TIT2") else "",
+                "artist": tags.get("TPE1", {}).text[0] if tags.get("TPE1") else "",
+                "album": tags.get("TALB", {}).text[0] if tags.get("TALB") else "",
+                "album_art": ""
+            }
+            if hasattr(tags, "getall"):
+                apic = tags.getall("APIC")
+                if apic:
+                    meta["album_art"] = f"data:{apic[0].mime};base64,{base64.b64encode(apic[0].data).decode()}"
+            return file_id, meta
+        else:
+            logging.error(f"Graph API failed for file ID {file_id} with status {res.status_code}")
+            return file_id, {}
+    except Exception as e:
+        logging.error(f"Failed to process metadata for {file_id}: {e}")
+    return file_id, {}
+
 
 @main_bp.route("/metadata/batch", methods=["POST"])
 def batch_metadata():
@@ -151,35 +189,22 @@ def batch_metadata():
 
     try:
         file_ids = request.json.get("ids", [])
-        results = {}
+        if not file_ids:
+            return jsonify({})
 
-        for file_id in file_ids:
-            res = http_metadata.get(f"{GRAPH_BASE_URL}/me/drive/items/{file_id}/content", headers=headers, timeout=5)
-            if res.status_code == 200:
-                try:
-                    audio = MP3(BytesIO(res.content))
-                    tags = audio.tags or {}
-                    meta = {
-                        "title": tags.get("TIT2", {}).text[0] if tags.get("TIT2") else "",
-                        "artist": tags.get("TPE1", {}).text[0] if tags.get("TPE1") else "",
-                        "album": tags.get("TALB", {}).text[0] if tags.get("TALB") else "",
-                        "album_art": ""
-                    }
-                    if hasattr(tags, "getall"):
-                        apic = tags.getall("APIC")
-                        if apic:
-                            meta["album_art"] = f"data:{apic[0].mime};base64,{base64.b64encode(apic[0].data).decode()}"
+        results = {}
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            future_to_file_id = {executor.submit(fetch_and_process_metadata, file_id, headers): file_id for file_id in file_ids}
+            
+            for future in concurrent.futures.as_completed(future_to_file_id):
+                file_id, meta = future.result()
+                if meta:
                     results[file_id] = meta
-                except:
-                    results[file_id] = {}
-            else:
-                results[file_id] = {}
 
         return jsonify(results)
     except Exception as e:
-        logging.exception(e)
-        return jsonify({"error": "An internal error occurred."}), 500
-
+        logging.error(f"An unhandled error occurred in batch_metadata: {e}", exc_info=True)
+        return jsonify({"error": "An internal server error occurred."}), 500
 
 
 @main_bp.route("/users", methods=["GET", "POST"])
