@@ -507,8 +507,19 @@ function selectFile(fileId, fileName) {
   console.log("Pausing background metadata loading for priority selection.");
   isQueuePaused = true;
 
-  songQueue.splice(currentIndex + 1, 0, { fileId, fileName });
-  currentIndex++;
+  if (shuffleOn) {
+    // When in shuffle mode, selecting a song from the file list should reset the upcoming queue
+    // and start playback from the newly selected song. This ensures the shuffle context
+    // switches to the current folder, fixing the bug.
+    songQueue.splice(currentIndex + 1); // Clear all upcoming songs from the old context.
+    songQueue.push({ fileId, fileName }); // Add the newly selected song to the end of the queue.
+    currentIndex = songQueue.length - 1; // Move the current playback index to this new song.
+  } else {
+    // Original behavior for non-shuffle mode (insert as "play next").
+    songQueue.splice(currentIndex + 1, 0, { fileId, fileName });
+    currentIndex++;
+  }
+
   playCurrentSong();
 }
 
