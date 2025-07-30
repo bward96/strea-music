@@ -105,6 +105,9 @@ function initEventListeners() {
       if (volumeSlider) volumeSlider.value = Math.round(audioPlayer.volume * 100);
       updateVolCSS();
     });
+    audioPlayer.addEventListener("error", () => {
+      window.location.href = "/login";
+    });
   }
 
   // --- Player Controls ---
@@ -366,7 +369,7 @@ function formatDuration(seconds) {
 
 function checkAuthResponse(response) {
   if (response.status === 401) {
-    window.location.href = "/";
+    window.location.href = "/login";
     throw new Error("InvalidAuthenticationToken");
   }
   return response;
